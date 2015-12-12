@@ -1,19 +1,20 @@
 {
-	"manifest_version": 2,
-	"name": "InfoClock",
-	"description": "An alarm clock that wakes you up by giving you a variety of useful information like today's weather.",
-	"version": "0.1",
-	"background": {
-		"scripts": [
-			"lib/weather.js",
-			"lib/alarm_message.js",
-			"config.js",
-			"alarm.js"
-		]
-	},
-	"permissions": [
-		"alarms",
-		"background"
-	],
-	"web_accessible_resources": ["*.mp3"]
+    "manifest_version": 2,
+    "name": "InfoClock",
+    "description": "An alarm clock that wakes you up by giving you a variety of useful information like today's weather.",
+    "version": "0.1",
+    "background": {
+        "scripts": [
+            "lib/weather.js",
+            "lib/alarm_message.js",
+            "config.js",
+            "alarm.js"
+        ]
+    },
+    "permissions": [
+        "alarms",
+        "background",
+        "https://api.forecast.io/"
+    ],
+    "web_accessible_resources": ["*.mp3"]
 }
