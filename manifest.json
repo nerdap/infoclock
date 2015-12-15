@@ -5,6 +5,8 @@
     "version": "0.1",
     "background": {
         "scripts": [
+            "lib/util.js",
+            "lib/qod.js",
             "lib/weather.js",
             "lib/alarm_message.js",
             "config.js",
@@ -14,7 +16,8 @@
     "permissions": [
         "alarms",
         "background",
-        "https://api.forecast.io/"
+        "https://api.forecast.io/",
+        "http://api.theysaidso.com/"
     ],
     "web_accessible_resources": ["*.mp3"]
 }

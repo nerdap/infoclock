@@ -5,8 +5,8 @@ function playAudio(file_path) {
     audio.play();
 }
 
-function playAlarm(alarm_name) {
-    var file_path = getAlarmTrack(alarm_name);
+function playAlarm(alarm_config) {
+    var file_path = alarm_config.getTrack();
     playAudio(file_path);
 }
 
@@ -30,38 +30,47 @@ function getAlarmTimeInMsFromEpoch(time_of_day) {
     return alarm_date.getTime();
 }
 
-function setAlarm(alarm_name) {
-    if (typeof chrome.alarms !== 'undefined') {
-        chrome.alarms.create(alarm_name, {
-            "when": getAlarmTimeInMsFromEpoch(getAlarmTime(alarm_name)),
-            "periodInMinutes": 24 * 60,
-        });
-    } else {
-        console.log('chrome.alarms is undefined. Trying again.');
+function speakMessages(messages, i) {
+    var sentence_delay = 2000;
+    if (i >= messages.length) {
+        return;
     }
+    var utterance = new SpeechSynthesisUtterance(messages[i]);
+    utterance.voice = speechSynthesis.getVoices()[1];
+    utterance.lang = "en-US";
+    utterance.rate = 0.8;
+    utterance.onend = function(event) {
+        setTimeout(
+            speakMessages,
+            sentence_delay,
+            messages,
+            i + 1
+        );
+    };
+    console.log("SAYING: " + messages[i]);
+    speechSynthesis.speak(utterance);
 }
 
-function speakAlarmMessage(alarm_name) {
-    getAlarmMessage(alarm_name, function(alarm_message) {
-        var utterance = new SpeechSynthesisUtterance(alarm_message);
-        utterance.voice = speechSynthesis.getVoices()[1];
-        utterance.lang = "en-US";
-        utterance.rate = 0.8;
-        console.log("SAYING: " + alarm_message);
-        speechSynthesis.speak(utterance);
+function speakAlarmMessage(alarm_config) {
+    alarm_config.getMessages(function(alarm_messages) {
+        speakMessages(alarm_messages, 0);
     });
 }
 
 chrome.alarms.onAlarm.addListener(function (alarm) {
-    if (!isValidAlarm(alarm.name)) {
+    if (!AlarmConfig.isValidAlarm(alarm.name)) {
+        console.error("Could not find alarm \'" + alarm.name + "\'");
         return;
     }
-    //playAlarm(alarm.name);
-    speakAlarmMessage(alarm.name);
+    var alarm_config = AlarmConfig.getAlarm(alarm.name);
+    //playAlarm(alarm_config);
+    speakAlarmMessage(alarm_config);
 });
 
-chrome.app.runtime.onLaunched.addListener(function() {
-    getAlarmList().forEach(function(alarm_name) {
-        setAlarm(alarm_name);
+// Set alarms.
+AlarmConfig.getAlarmList().forEach(function(alarm) {
+    chrome.alarms.create(alarm.getName(), {
+        "when": getAlarmTimeInMsFromEpoch(alarm.getTime()),
+        "periodInMinutes": 24 * 60, // Repeat alarm daily.
     });
 });
